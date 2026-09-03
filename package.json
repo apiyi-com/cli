@@ -4,7 +4,7 @@
   "description": "APIYI command line: check your key, list models, chat, generate images, all through api.apiyi.com. Zero dependencies.",
   "type": "module",
   "bin": {
-    "apiyi": "./bin/apiyi.js"
+    "apiyi": "bin/apiyi.js"
   },
   "files": [
     "bin",
