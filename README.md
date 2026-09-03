@@ -63,7 +63,7 @@ latency), `b` (backup), `cf` (Cloudflare CDN, text only, about 100 s cap).
 Paste to your coding or chat agent:
 
 ```
-请帮我安装并跑通 API易 命令行工具：https://github.com/apiyi/cli
+请帮我安装并跑通 API易 命令行工具：https://github.com/apiyi-com/cli
 要求：Node 18 以上；直接 `npx apiyi@latest check` 零安装；引导我配置 API Key；
 最后跑 `npx apiyi@latest chat "你好" -m gpt-5.4-mini`，把输出贴给我。
 ```
