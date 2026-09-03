@@ -1,0 +1,43 @@
+{
+  "name": "apiyi",
+  "version": "0.1.0",
+  "description": "APIYI command line: check your key, list models, chat, generate images, all through api.apiyi.com. Zero dependencies.",
+  "type": "module",
+  "bin": {
+    "apiyi": "./bin/apiyi.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.17"
+  },
+  "scripts": {
+    "test": "node --test",
+    "start": "node bin/apiyi.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apiyi/cli.git"
+  },
+  "homepage": "https://docs.apiyi.com/developer-kit",
+  "bugs": {
+    "url": "https://github.com/apiyi/cli/issues"
+  },
+  "keywords": [
+    "apiyi",
+    "openai",
+    "anthropic",
+    "gemini",
+    "llm",
+    "cli",
+    "api-gateway"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}
