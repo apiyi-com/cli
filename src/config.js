@@ -40,13 +40,22 @@ export function resolveApiKey(explicit, env = process.env) {
   return { key: null, source: null };
 }
 
-export function resolveSystemToken(explicit, env = process.env) {
-  if (explicit && explicit !== true) return { token: String(explicit).trim(), source: '--system-token' };
-  if (env.APIYI_SYSTEM_TOKEN?.trim()) return { token: env.APIYI_SYSTEM_TOKEN.trim(), source: 'APIYI_SYSTEM_TOKEN' };
+// Management token for /api/* (balance). Personal access tokens start with "nap_"; anything else is a
+// legacy system token, retired on LEGACY_TOKEN_RETIRE_DATE. The old flag, env var and config field still
+// work as aliases so existing setups keep running.
+// Lookup order: --access-token / --system-token, APIYI_ACCESS_TOKEN, APIYI_SYSTEM_TOKEN, config.
+export function resolveAccessToken(explicit, env = process.env) {
+  const found = (token, source) => ({ token, source, legacy: !token.startsWith('nap_') });
+  if (explicit && explicit !== true) return found(String(explicit).trim(), '--access-token');
+  if (env.APIYI_ACCESS_TOKEN?.trim()) return found(env.APIYI_ACCESS_TOKEN.trim(), 'APIYI_ACCESS_TOKEN');
+  if (env.APIYI_SYSTEM_TOKEN?.trim()) return found(env.APIYI_SYSTEM_TOKEN.trim(), 'APIYI_SYSTEM_TOKEN');
   const cfg = readConfig();
-  if (cfg.systemToken) return { token: String(cfg.systemToken).trim(), source: '~/.config/apiyi/config.json' };
-  return { token: null, source: null };
+  const saved = cfg.accessToken || cfg.systemToken;
+  if (saved) return found(String(saved).trim(), '~/.config/apiyi/config.json');
+  return { token: null, source: null, legacy: false };
 }
+
+export const resolveSystemToken = resolveAccessToken;
 
 // A key must be printable ASCII with no spaces. Anything else is a placeholder or a paste error,
 // and would otherwise surface as an opaque ByteString error from fetch.

@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { statusFromHttp, extractMessage, CliError } from '../src/errors.js';
-import { resolveApiKey, resolveSystemToken, maskKey, keyShapeProblem } from '../src/config.js';
+import { resolveApiKey, resolveAccessToken, resolveSystemToken, maskKey, keyShapeProblem } from '../src/config.js';
+import { accessTokenHint, throwForAccessToken } from '../src/access-token.js';
 import { baseUrlFor, request } from '../src/http.js';
 import { table } from '../src/output.js';
 import { EXIT } from '../src/constants.js';
@@ -27,6 +28,22 @@ test('key lookup order: flag beats env beats config', () => {
   assert.deepEqual(resolveApiKey(' sk-flag ', { APIYI_API_KEY: 'sk-env' }), { key: 'sk-flag', source: '--api-key' });
   assert.deepEqual(resolveApiKey(undefined, { APIYI_API_KEY: 'sk-env' }), { key: 'sk-env', source: 'APIYI_API_KEY' });
   assert.equal(resolveSystemToken(true, { APIYI_SYSTEM_TOKEN: 'tok' }).token, 'tok');
+});
+
+test('access token: new env beats legacy env, legacy detected by missing nap_ prefix', () => {
+  const both = resolveAccessToken(undefined, { APIYI_ACCESS_TOKEN: 'nap_new', APIYI_SYSTEM_TOKEN: 'old' });
+  assert.deepEqual(both, { token: 'nap_new', source: 'APIYI_ACCESS_TOKEN', legacy: false });
+  assert.equal(resolveAccessToken(undefined, { APIYI_SYSTEM_TOKEN: 'old' }).legacy, true);
+  assert.equal(resolveAccessToken(' nap_flag ', { APIYI_ACCESS_TOKEN: 'nap_env' }).token, 'nap_flag');
+});
+
+test('access token errors map to actionable hints', () => {
+  const r = (status, obj) => ({ status, body: JSON.stringify(obj), json: obj });
+  assert.match(accessTokenHint(r(401, { code: 'ACCESS_TOKEN_LEGACY_RETIRED', message: 'x' })), /retired/);
+  assert.match(accessTokenHint(r(403, { code: 'ACCESS_TOKEN_SCOPE_DENIED', message: 'x' })), /Profile: Read/);
+  assert.match(accessTokenHint(r(401, { message: 'This access token may not be used from the current IP address.' })), /IP/);
+  assert.equal(accessTokenHint(r(401, { message: 'Unauthorized' })), null);
+  assert.throws(() => throwForAccessToken(r(200, { success: false, message: 'The access token is invalid.' })), (e) => e.status === 'invalid_key');
 });
 
 test('maskKey never reveals the middle', () => {

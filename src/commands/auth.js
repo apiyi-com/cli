@@ -1,5 +1,5 @@
 import readline from 'node:readline';
-import { readConfig, writeConfig, maskKey, CONFIG_FILE, resolveApiKey, resolveSystemToken } from '../config.js';
+import { readConfig, writeConfig, maskKey, CONFIG_FILE, resolveApiKey, resolveAccessToken } from '../config.js';
 import { CliError } from '../errors.js';
 import { EXIT } from '../constants.js';
 import { printResult } from '../output.js';
@@ -24,37 +24,43 @@ export async function auth(sub, opts, positional) {
   const cfg = readConfig();
   switch (sub) {
     case 'set-key': {
-      const isSystem = opts.systemToken === true;
+      const isToken = opts.accessToken === true;
       let value = positional[0];
       if (!value) {
         if (!process.stdin.isTTY) {
           throw new CliError('bad_args', 'Pass the key as an argument when stdin is not a terminal: apiyi auth set-key sk-...');
         }
-        value = await askHidden(isSystem ? 'System token (input hidden): ' : 'API key (input hidden): ');
+        value = await askHidden(isToken ? 'Personal access token (input hidden): ' : 'API key (input hidden): ');
       }
       if (!value) throw new CliError('bad_args', 'Empty value, nothing saved.');
-      if (!isSystem && !value.startsWith('sk-')) process.stderr.write('Warning: APIYI keys start with "sk-". Saving anyway.\n');
-      if (isSystem) cfg.systemToken = value;
-      else cfg.apiKey = value;
+      if (!isToken && !value.startsWith('sk-')) process.stderr.write('Warning: APIYI keys start with "sk-". Saving anyway.\n');
+      if (isToken && !value.startsWith('nap_')) {
+        process.stderr.write('Warning: personal access tokens start with "nap_". Legacy system tokens retire on 2026-11-11 (UTC+8). Saving anyway.\n');
+      }
+      if (isToken) {
+        cfg.accessToken = value;
+        delete cfg.systemToken;
+      } else cfg.apiKey = value;
       writeConfig(cfg);
-      printResult({ status: 'ok', saved: isSystem ? 'systemToken' : 'apiKey', file: CONFIG_FILE }, opts, (r) => `Saved ${r.saved} to ${r.file} (mode 0600)`);
+      printResult({ status: 'ok', saved: isToken ? 'accessToken' : 'apiKey', file: CONFIG_FILE }, opts, (r) => `Saved ${r.saved} to ${r.file} (mode 0600)`);
       return EXIT.ok;
     }
     case 'show': {
       const k = resolveApiKey(opts.apiKey);
-      const t = resolveSystemToken(opts.systemToken);
+      const t = resolveAccessToken(opts.accessToken);
       const result = {
         status: 'ok',
         api_key: maskKey(k.key) || null,
         api_key_source: k.source,
-        system_token: t.token ? maskKey(t.token) : null,
-        system_token_source: t.source,
+        access_token: t.token ? maskKey(t.token) : null,
+        access_token_source: t.source,
+        access_token_legacy: t.token ? t.legacy : null,
         file: CONFIG_FILE,
       };
       printResult(result, opts, (r) =>
         [
           `api key:       ${r.api_key || '(none)'}${r.api_key_source ? ` from ${r.api_key_source}` : ''}`,
-          `system token:  ${r.system_token || '(none)'}${r.system_token_source ? ` from ${r.system_token_source}` : ''}`,
+          `access token:  ${r.access_token || '(none)'}${r.access_token_source ? ` from ${r.access_token_source}` : ''}${r.access_token_legacy ? ' (legacy system token, retires 2026-11-11 UTC+8)' : ''}`,
           `config file:   ${r.file}`,
         ].join('\n'),
       );
@@ -62,12 +68,13 @@ export async function auth(sub, opts, positional) {
     }
     case 'clear': {
       delete cfg.apiKey;
+      delete cfg.accessToken;
       delete cfg.systemToken;
       writeConfig(cfg);
-      printResult({ status: 'ok', file: CONFIG_FILE }, opts, (r) => `Cleared key and system token from ${r.file}`);
+      printResult({ status: 'ok', file: CONFIG_FILE }, opts, (r) => `Cleared key and access token from ${r.file}`);
       return EXIT.ok;
     }
     default:
-      throw new CliError('bad_args', 'Usage: apiyi auth <set-key [--system-token] | show | clear>');
+      throw new CliError('bad_args', 'Usage: apiyi auth <set-key [--access-token] | show | clear>');
   }
 }

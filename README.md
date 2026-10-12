@@ -15,15 +15,15 @@ is the status, so scripts and agents can branch on it.
 
 | Command | Needs | What it does |
 |---|---|---|
-| `apiyi check` | key optional | Self-check. Shows balance too if a system token is configured |
+| `apiyi check` | key optional | Self-check. Shows balance too if a personal access token is configured |
 | `apiyi models [--grep text]` | key optional | Lists models. With a key: what that key can reach. Without: the public registry |
 | `apiyi chat "prompt" [-m model] [--stream] [--system "..."]` | key | One Chat Completions call. Default model `gpt-5.4-mini` |
 | `apiyi responses "input" [-m model] [--effort low]` | key | One Responses call, prints `output_text` |
 | `apiyi image "prompt" [-m gpt-image-2] [-o out.png] [--size WxH] [--n 1]` | key | Generates an image to a local file (360 s timeout, billed per call) |
-| `apiyi balance` | system token | Balance in USD (500000 quota units = 1 USD) |
-| `apiyi auth set-key [--system-token]` / `show` / `clear` | none | Saves to `~/.config/apiyi/config.json` with mode 0600 |
+| `apiyi balance` | personal access token | Balance in USD (500000 quota units = 1 USD) |
+| `apiyi auth set-key [--access-token]` / `show` / `clear` | none | Saves to `~/.config/apiyi/config.json` with mode 0600 |
 
-Global flags: `--api-key`, `--system-token`, `--node api|vip|b|cf`, `--base-url`, `--timeout <ms>`, `--json`, `--quiet`.
+Global flags: `--api-key`, `--access-token`, `--node api|vip|b|cf`, `--base-url`, `--timeout <ms>`, `--json`, `--quiet`.
 
 ## Keys
 
@@ -33,9 +33,15 @@ installed the OpenClaw skill, the CLI reuses that key.
 
 Get a key at https://api.apiyi.com/token. Keys start with `sk-`.
 
-A normal key cannot read the balance. `apiyi balance` needs the **system token**
-from the bottom of https://api.apiyi.com/account/profile, stored with
-`apiyi auth set-key --system-token` or `APIYI_SYSTEM_TOKEN`.
+A normal key cannot read the balance. `apiyi balance` needs a **personal access token**
+(starts with `nap_`). Create one at https://api.apiyi.com/account/profile under
+Account Options -> Personal Access Tokens, select "Profile: Read", then store it with
+`apiyi auth set-key --access-token` or `APIYI_ACCESS_TOKEN`.
+Details: https://docs.apiyi.com/faq/personal-access-token
+
+Legacy system tokens retire on 2026-11-11 (UTC+8). Until then they still work, and
+`--system-token` / `APIYI_SYSTEM_TOKEN` remain accepted as aliases; the CLI prints a
+warning when it sees one.
 
 ## Exit codes
 

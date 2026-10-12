@@ -17,12 +17,13 @@ Usage:
   apiyi chat "prompt" [-m model] [--stream] [--system "..."]
   apiyi responses "input" [-m model] [--effort low|medium|high]
   apiyi image "prompt" [-m gpt-image-2] [-o out.png] [--size WxH] [--n 1]
-  apiyi balance                                needs a system token, not an sk- key
-  apiyi auth set-key [--system-token] | show | clear
+  apiyi balance                                needs a personal access token (nap_...), not an sk- key
+  apiyi auth set-key [--access-token] | show | clear
 
 Global options:
   --api-key <key>        override key lookup (else APIYI_API_KEY, ~/.config/apiyi/config.json, ~/.openclaw/openclaw.json)
-  --system-token <tok>   for balance (else APIYI_SYSTEM_TOKEN, config)
+  --access-token <tok>   personal access token for balance (else APIYI_ACCESS_TOKEN, config);
+                         --system-token / APIYI_SYSTEM_TOKEN still work as aliases
   --node api|vip|b|cf    api (default, mainland China), vip (overseas), b (backup), cf (Cloudflare, text only)
   --base-url <url>       custom base URL (overrides --node)
   --timeout <ms>         request timeout, default 120000
@@ -36,6 +37,7 @@ Docs: ${DOCS_URL}`;
 
 const OPTIONS = {
   'api-key': { type: 'string' },
+  'access-token': { type: 'string' },
   'system-token': { type: 'string' },
   node: { type: 'string' },
   'base-url': { type: 'string' },
@@ -55,9 +57,11 @@ const OPTIONS = {
 };
 
 export async function main(argv) {
-  // `auth set-key --system-token` uses the flag as a boolean; everywhere else it takes a value.
-  const authSystemFlag = argv[0] === 'auth' && argv.includes('--system-token');
-  const argvClean = authSystemFlag ? argv.filter((a) => a !== '--system-token') : argv;
+  // `auth set-key --access-token` uses the flag as a boolean; everywhere else it takes a value.
+  // --system-token is the pre-0.2 name and still works.
+  const TOKEN_FLAGS = ['--access-token', '--system-token'];
+  const authTokenFlag = argv[0] === 'auth' && argv.some((a) => TOKEN_FLAGS.includes(a));
+  const argvClean = authTokenFlag ? argv.filter((a) => !TOKEN_FLAGS.includes(a)) : argv;
   let parsed;
   try {
     parsed = parseArgs({ args: argvClean, options: OPTIONS, allowPositionals: true, strict: true });
@@ -78,7 +82,7 @@ export async function main(argv) {
 
   const opts = {
     apiKey: values['api-key'],
-    systemToken: authSystemFlag ? true : values['system-token'],
+    accessToken: authTokenFlag ? true : values['access-token'] ?? values['system-token'],
     node: values.node,
     baseUrl: values['base-url'],
     timeout: Number(values.timeout || 120000),

@@ -1,7 +1,8 @@
-import { resolveApiKey, resolveSystemToken, maskKey, keyShapeProblem } from '../config.js';
+import { resolveApiKey, resolveAccessToken, maskKey, keyShapeProblem } from '../config.js';
 import { baseUrlFor, request, bearer } from '../http.js';
 import { statusFromHttp, extractMessage } from '../errors.js';
-import { CONSOLE_TOKEN_URL, CONSOLE_PROFILE_URL, QUOTA_PER_USD, EXIT } from '../constants.js';
+import { CONSOLE_TOKEN_URL, CONSOLE_PROFILE_URL, QUOTA_PER_USD, EXIT, LEGACY_TOKEN_RETIRE_DATE } from '../constants.js';
+import { accessTokenHint } from '../access-token.js';
 import { printResult } from '../output.js';
 
 export async function check(opts) {
@@ -41,13 +42,16 @@ export async function check(opts) {
     }
   }
 
-  // Balance needs the system token; a normal key cannot read it. Optional, never affects status.
-  const { token } = resolveSystemToken(opts.systemToken);
+  // Balance needs a personal access token; a normal key cannot read it. Optional, never affects status.
+  const { token, legacy } = resolveAccessToken(opts.accessToken);
   if (token) {
+    if (legacy) result.access_token_note = `legacy system token, retires on ${LEGACY_TOKEN_RETIRE_DATE}; switch to a personal access token`;
     try {
       const res = await request(`${base}/api/user/self`, { headers: { Authorization: token }, timeoutMs: opts.timeout });
       if (res.status === 200 && res.json?.data) {
         result.balance_usd = Number((res.json.data.quota / QUOTA_PER_USD).toFixed(4));
+      } else {
+        result.balance_error = accessTokenHint(res) || `HTTP ${res.status}`;
       }
     } catch {
       /* balance is best-effort */
@@ -60,7 +64,9 @@ export async function check(opts) {
     if (r.latency_ms != null) lines.push(`latency:  ${r.latency_ms} ms`);
     if (r.model_count != null) lines.push(`models:   ${r.model_count} visible to this key`);
     if (r.balance_usd != null) lines.push(`balance:  $${r.balance_usd}`);
-    else if (r.status === 'ready') lines.push(`balance:  (needs a system token from ${CONSOLE_PROFILE_URL}; see "apiyi balance")`);
+    else if (r.balance_error) lines.push(`balance:  (${r.balance_error})`);
+    else if (r.status === 'ready') lines.push(`balance:  (needs a personal access token from ${CONSOLE_PROFILE_URL}; see "apiyi balance")`);
+    if (r.access_token_note) lines.push(`token:    ${r.access_token_note}`);
     if (r.hint) lines.push(`hint:     ${r.hint}`);
     return lines.join('\n');
   });
