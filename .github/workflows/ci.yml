@@ -15,4 +15,4 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: npm test
-      - run: node bin/apiyi.js --help
+      - run: node bin/apiyi.js check --help   # bare --help exits 8 by design

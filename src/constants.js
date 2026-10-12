@@ -12,7 +12,7 @@ export const DOCS_URL = 'https://docs.apiyi.com/developer-kit';
 export const DEFAULT_MODEL = 'gpt-5.4-mini';
 export const DEFAULT_IMAGE_MODEL = 'gpt-image-2';
 export const QUOTA_PER_USD = 500000;
-export const USER_AGENT = 'apiyi-cli/0.2.0';
+export const USER_AGENT = 'apiyi-cli/0.2.1';
 export const ACCESS_TOKEN_DOCS_URL = 'https://docs.apiyi.com/faq/personal-access-token';
 export const LEGACY_TOKEN_RETIRE_DATE = '2026-11-11 (UTC+8)';
 

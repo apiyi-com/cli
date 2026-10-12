@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+- CI smoke test runs `apiyi check --help` (bare `--help` exits 8 by design), so CI is green again.
+
 ## 0.2.0
 
 - `balance` and `check` now use a **personal access token** (`nap_...`, "Profile: Read"):
