@@ -1,6 +1,6 @@
 {
   "name": "apiyi",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "APIYI command line: check your key, list models, chat, generate images, all through api.apiyi.com. Zero dependencies.",
   "type": "module",
   "bin": {
