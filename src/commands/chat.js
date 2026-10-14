@@ -2,13 +2,13 @@ import { resolveApiKey, keyShapeProblem } from '../config.js';
 import { baseUrlFor, request, bearer, throwForStatus } from '../http.js';
 import { readSse } from '../sse.js';
 import { CliError } from '../errors.js';
-import { CONSOLE_TOKEN_URL, DEFAULT_MODEL, EXIT, USER_AGENT } from '../constants.js';
+import { CONSOLE_TOKEN_URL, DEFAULT_MODEL, EXIT, USER_AGENT, selfCmd } from '../constants.js';
 import { printResult } from '../output.js';
 
 function requireKey(opts) {
   const { key } = resolveApiKey(opts.apiKey);
   if (!key) {
-    throw new CliError('no_key', `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "apiyi auth set-key" or export APIYI_API_KEY.`);
+    throw new CliError('no_key', `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "${selfCmd()} auth set-key" or export APIYI_API_KEY.`);
   }
   const problem = keyShapeProblem(key);
   if (problem) throw new CliError('invalid_key', `The API key ${problem}. Copy a real one at ${CONSOLE_TOKEN_URL}.`);

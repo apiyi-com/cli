@@ -1,10 +1,10 @@
 import { CliError, extractMessage, statusFromHttp } from './errors.js';
-import { ACCESS_TOKEN_DOCS_URL, CONSOLE_PROFILE_URL, LEGACY_TOKEN_RETIRE_DATE } from './constants.js';
+import { ACCESS_TOKEN_DOCS_URL, CONSOLE_PROFILE_URL, LEGACY_TOKEN_RETIRE_DATE, selfCmd } from './constants.js';
 
 export const NO_TOKEN_HINT =
   `Balance needs a personal access token (starts with "nap_"), not an sk- key. Create one at ${CONSOLE_PROFILE_URL} ` +
   '-> Account Options -> Personal Access Tokens with "Profile: Read", ' +
-  'then run "apiyi auth set-key --access-token" or export APIYI_ACCESS_TOKEN.';
+  `then run "${selfCmd()} auth set-key --access-token" or export APIYI_ACCESS_TOKEN.`;
 
 export const LEGACY_WARNING =
   `Warning: this looks like a legacy system token. System tokens retire on ${LEGACY_TOKEN_RETIRE_DATE}; ` +

@@ -1,6 +1,6 @@
 import { parseArgs } from 'node:util';
 import { createRequire } from 'node:module';
-import { EXIT, DOCS_URL } from './constants.js';
+import { EXIT, DOCS_URL, selfCmd } from './constants.js';
 import { CliError } from './errors.js';
 import { check } from './commands/check.js';
 import { models } from './commands/models.js';
@@ -33,6 +33,8 @@ Global options:
 
 Exit codes: 0 ok, 2 no_key, 3 invalid_key, 4 network_error, 5 model_not_found,
             6 rate_limited_or_no_balance, 7 bad_request, 8 bad_args, 1 unexpected
+${selfCmd() === 'apiyi' ? '' : `\nRunning via npx: there is no "apiyi" command on your PATH. Prefix every command with
+"npx apiyi@latest" (e.g. npx apiyi@latest auth set-key), or install once with: npm i -g apiyi\n`}
 Docs: ${DOCS_URL}`;
 
 const OPTIONS = {

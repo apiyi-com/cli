@@ -1,7 +1,7 @@
 import readline from 'node:readline';
 import { readConfig, writeConfig, maskKey, CONFIG_FILE, resolveApiKey, resolveAccessToken } from '../config.js';
 import { CliError } from '../errors.js';
-import { EXIT } from '../constants.js';
+import { EXIT, selfCmd } from '../constants.js';
 import { printResult } from '../output.js';
 
 // Prompt on stderr with echo suppressed, so the key never lands in the terminal scrollback.
@@ -28,7 +28,7 @@ export async function auth(sub, opts, positional) {
       let value = positional[0];
       if (!value) {
         if (!process.stdin.isTTY) {
-          throw new CliError('bad_args', 'Pass the key as an argument when stdin is not a terminal: apiyi auth set-key sk-...');
+          throw new CliError('bad_args', `Pass the key as an argument when stdin is not a terminal: ${selfCmd()} auth set-key sk-...`);
         }
         value = await askHidden(isToken ? 'Personal access token (input hidden): ' : 'API key (input hidden): ');
       }

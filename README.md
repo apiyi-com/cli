@@ -11,6 +11,16 @@ Nothing to install. `check` reports where your key came from, whether the node
 is reachable, whether `/v1/models` returns 200, and the latency. Its exit code
 is the status, so scripts and agents can branch on it.
 
+`npx` runs the CLI without installing it, so there is no `apiyi` command on your
+PATH afterwards. Either keep the prefix on every command, or install it once:
+
+```bash
+npx apiyi@latest auth set-key   # paste your sk- key (input hidden)
+npm i -g apiyi                  # optional: after this, plain `apiyi check` works
+```
+
+The tables below write `apiyi ...` for short; under npx read it as `npx apiyi@latest ...`.
+
 ## Commands
 
 | Command | Needs | What it does |

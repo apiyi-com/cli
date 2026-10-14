@@ -3,14 +3,14 @@ import path from 'node:path';
 import { resolveApiKey, keyShapeProblem } from '../config.js';
 import { baseUrlFor, request, bearer, throwForStatus } from '../http.js';
 import { CliError } from '../errors.js';
-import { CONSOLE_TOKEN_URL, DEFAULT_IMAGE_MODEL, EXIT } from '../constants.js';
+import { CONSOLE_TOKEN_URL, DEFAULT_IMAGE_MODEL, EXIT, selfCmd } from '../constants.js';
 import { printResult } from '../output.js';
 
 export async function image(prompt, opts) {
   if (!prompt) throw new CliError('bad_args', 'Usage: apiyi image "prompt" [-m gpt-image-2] [-o out.png] [--size 1024x1024] [--n 1]');
   const { key } = resolveApiKey(opts.apiKey);
   if (!key) {
-    throw new CliError('no_key', `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "apiyi auth set-key" or export APIYI_API_KEY.`);
+    throw new CliError('no_key', `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "${selfCmd()} auth set-key" or export APIYI_API_KEY.`);
   }
   if (keyShapeProblem(key)) throw new CliError('invalid_key', `The API key ${keyShapeProblem(key)}. Copy a real one at ${CONSOLE_TOKEN_URL}.`);
   const base = baseUrlFor(opts);

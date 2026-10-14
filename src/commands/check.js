@@ -1,7 +1,7 @@
 import { resolveApiKey, resolveAccessToken, maskKey, keyShapeProblem } from '../config.js';
 import { baseUrlFor, request, bearer } from '../http.js';
 import { statusFromHttp, extractMessage } from '../errors.js';
-import { CONSOLE_TOKEN_URL, CONSOLE_PROFILE_URL, QUOTA_PER_USD, EXIT, LEGACY_TOKEN_RETIRE_DATE } from '../constants.js';
+import { CONSOLE_TOKEN_URL, CONSOLE_PROFILE_URL, QUOTA_PER_USD, EXIT, LEGACY_TOKEN_RETIRE_DATE, selfCmd } from '../constants.js';
 import { accessTokenHint } from '../access-token.js';
 import { printResult } from '../output.js';
 
@@ -19,7 +19,7 @@ export async function check(opts) {
 
   if (!key) {
     result.status = 'no_key';
-    result.hint = `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "apiyi auth set-key" or export APIYI_API_KEY.`;
+    result.hint = `No API key found. Copy one at ${CONSOLE_TOKEN_URL}, then run "${selfCmd()} auth set-key" or export APIYI_API_KEY.`;
   } else if (keyShapeProblem(key)) {
     result.status = 'invalid_key';
     result.hint = `The key from ${source} ${keyShapeProblem(key)}. Copy a real one at ${CONSOLE_TOKEN_URL}.`;

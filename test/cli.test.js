@@ -5,7 +5,7 @@ import { resolveApiKey, resolveAccessToken, resolveSystemToken, maskKey, keyShap
 import { accessTokenHint, throwForAccessToken } from '../src/access-token.js';
 import { baseUrlFor, request } from '../src/http.js';
 import { table } from '../src/output.js';
-import { EXIT } from '../src/constants.js';
+import { EXIT, selfCmd } from '../src/constants.js';
 import { main } from '../src/cli.js';
 
 test('http status maps to exit status', () => {
@@ -99,4 +99,10 @@ test('keyShapeProblem flags placeholders and accepts real-looking keys', () => {
   assert.match(keyShapeProblem('<YOUR_KEY>'), /sk-/);
   assert.match(keyShapeProblem('sk-abc 123'), /non-ASCII|whitespace/);
   assert.match(keyShapeProblem('sk-分组KEY'), /non-ASCII/);
+});
+
+test('hints spell out npx when running under npx / npm exec', () => {
+  assert.equal(selfCmd({ npm_command: 'exec' }), 'npx apiyi@latest');
+  assert.equal(selfCmd({}), 'apiyi');
+  assert.equal(selfCmd({ npm_command: 'run-script' }), 'apiyi');
 });
